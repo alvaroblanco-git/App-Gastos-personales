@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#6D5EF9">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Mis Gastos">
+  <title>Mis Gastos</title>
+  <link rel="manifest" href="./manifest.json">
+  <style>
+    :root{
+      --bg1:#f7f8ff; --bg2:#eef3ff; --surface:rgba(255,255,255,.90); --line:rgba(109,94,249,.12);
+      --text:#182033; --muted:#69728a; --primary:#6d5ef9; --primary2:#8f6dff; --accent:#19c2b5;
+      --danger:#e5484d; --shadow:0 18px 40px rgba(26,39,80,.12); --radius-xl:28px; --radius-lg:22px;
+    }
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0; min-height:100dvh;
+      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(143,109,255,.26), transparent 32%),
+        radial-gradient(circle at top right, rgba(25,194,181,.18), transparent 26%),
+        linear-gradient(180deg,var(--bg2),var(--bg1));
+    }
+    button,input,select{font:inherit}
+    .page{width:100%;max-width:430px;min-height:100dvh;margin:0 auto;padding:max(14px,env(safe-area-inset-top)) 14px calc(96px + env(safe-area-inset-bottom)) 14px}
+    .app-shell{background:linear-gradient(180deg, rgba(255,255,255,.70), rgba(255,255,255,.94));border:1px solid rgba(255,255,255,.58);box-shadow:var(--shadow);border-radius:34px;min-height:calc(100dvh - 28px);overflow:hidden;backdrop-filter:blur(16px)}
+    @media (max-width:460px){.page{padding:0 0 calc(96px + env(safe-area-inset-bottom)) 0}.app-shell{min-height:100dvh;border-radius:0;border:0}}
+    .app{padding:18px 16px 18px}
+    .header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}
+    .header small{display:block;color:var(--muted);font-weight:700;margin-bottom:4px}
+    .header h1{margin:0;font-size:1.75rem;letter-spacing:-.03em;line-height:1.05}
+    .icon-btn{width:44px;height:44px;border:0;border-radius:14px;background:rgba(255,255,255,.84);box-shadow:inset 0 0 0 1px rgba(109,94,249,.10);color:var(--primary);font-weight:900;font-size:1.1rem}
+    .hero{background:linear-gradient(145deg,#6d5ef9,#8f6dff 52%,#3dcfc0 125%);color:#fff;padding:18px;border-radius:var(--radius-xl);box-shadow:0 18px 36px rgba(109,94,249,.28);position:relative;overflow:hidden;margin-bottom:14px}
+    .hero:after{content:"";position:absolute;right:-34px;top:-42px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,.12)}
+    .hero small{opacity:.86;font-weight:700}.hero h2{margin:8px 0 4px;font-size:2rem;line-height:1;letter-spacing:-.04em}.hero p{margin:0;opacity:.92;font-size:.95rem}
+    .stats{margin-top:14px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .stat{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.18);border-radius:18px;padding:12px 10px}
+    .stat span{display:block;font-size:.72rem;opacity:.82;margin-bottom:5px}.stat strong{font-size:1rem;letter-spacing:-.02em}
+    .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);padding:16px;backdrop-filter:blur(12px);box-shadow:0 12px 26px rgba(23,38,70,.06);margin-bottom:14px}
+    .section-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px}
+    .section-head h3{margin:0;font-size:1.05rem;letter-spacing:-.02em}.section-head p{margin:0;color:var(--muted);font-size:.86rem}
+    .form-grid{display:grid;gap:12px}.field label{display:block;font-size:.84rem;color:var(--muted);font-weight:800;margin-bottom:7px}
+    .field input,.field select{width:100%;border:0;border-radius:16px;padding:14px;background:rgba(255,255,255,.96);box-shadow:inset 0 0 0 1px rgba(109,94,249,.12);color:var(--text)}
+    .row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .btn,.btn-secondary,.btn-ghost,.btn-danger{width:100%;border:0;border-radius:16px;padding:14px 16px;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:900;cursor:pointer;text-decoration:none}
+    .btn{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;box-shadow:0 14px 24px rgba(109,94,249,.24)}
+    .btn-secondary{background:linear-gradient(135deg,#15b97a,#19c2b5);color:#fff;box-shadow:0 14px 24px rgba(25,194,181,.20)}
+    .btn-ghost{background:rgba(109,94,249,.08);color:var(--primary)} .btn-danger{background:rgba(229,72,77,.10);color:var(--danger)}
+    .toolbar{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .expense-list,.category-list{display:grid;gap:10px}
+    .expense-item{border-radius:20px;padding:14px;background:rgba(255,255,255,.95);box-shadow:inset 0 0 0 1px rgba(109,94,249,.08)}
+    .expense-top,.expense-bottom{display:flex;justify-content:space-between;align-items:center;gap:12px}.expense-top{margin-bottom:8px}
+    .expense-title{font-weight:900;letter-spacing:-.02em;margin-bottom:4px}.expense-meta,.muted{color:var(--muted);font-size:.85rem}
+    .amount{font-size:1.1rem;font-weight:900;letter-spacing:-.03em;white-space:nowrap}
+    .badge{background:rgba(25,194,181,.10);color:#13857d;padding:7px 10px;border-radius:999px;font-size:.76rem;font-weight:900;white-space:nowrap}
+    .category-item{display:grid;gap:8px}.category-head{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:.95rem;font-weight:900}
+    .bar{width:100%;height:10px;background:rgba(109,94,249,.08);border-radius:999px;overflow:hidden}.bar>span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--accent),var(--primary))}
+    .empty{text-align:center;padding:20px 14px;border-radius:18px;background:rgba(109,94,249,.05);color:var(--muted)}
+    .helper-note{margin-top:10px;font-size:.78rem;color:var(--muted);text-align:center}
+    .small-actions{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end}
+    .list-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(109,94,249,.07)} .list-row:last-child{border-bottom:0}
+    .linkish{background:none;border:0;color:var(--danger);font-weight:800;padding:0}
+    .bottom-nav{position:fixed;left:50%;transform:translateX(-50%);bottom:12px;width:min(402px,calc(100vw - 20px));display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px;padding-bottom:calc(10px + env(safe-area-inset-bottom));background:rgba(255,255,255,.82);border:1px solid rgba(109,94,249,.12);border-radius:24px;backdrop-filter:blur(16px);box-shadow:0 18px 36px rgba(23,38,70,.12);z-index:20}
+    .nav-item{padding:10px 6px;border-radius:16px;text-align:center;font-size:.72rem;font-weight:900;color:var(--muted);text-decoration:none}
+    .nav-item span{display:block;font-size:1.05rem;margin-bottom:4px}.nav-item.active,.nav-item:hover{background:rgba(109,94,249,.08);color:var(--primary)}
+  </style>
+</head>
+<body>
+  <div class="page" id="top">
+    <div class="app-shell">
+      <main class="app">
+        <section class="header">
+          <div>
+            <small>App web gratis · lista para iPhone</small>
+            <h1>Mis gastos</h1>
+          </div>
+          <button class="icon-btn" id="helpBtn" title="Ayuda">?</button>
+        </section>
+
+        <section class="hero">
+          <small id="periodText">Este mes</small>
+          <h2 id="totalText">0,00 €</h2>
+          <p>Total acumulado con los filtros activos.</p>
+          <div class="stats">
+            <div class="stat"><span>Movimientos</span><strong id="countText">0</strong></div>
+            <div class="stat"><span>Categorías</span><strong id="catCountText">0</strong></div>
+            <div class="stat"><span>Filtro</span><strong id="filterText">Todas</strong></div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="section-head">
+            <div>
+              <h3>Acciones rápidas</h3>
+              <p>Los datos se guardan en este navegador.</p>
+            </div>
+          </div>
+          <div class="toolbar">
+            <button class="btn-secondary" id="exportJsonBtn">Exportar copia</button>
+            <label class="btn-ghost" for="importJsonInput">Importar copia</label>
+            <input id="importJsonInput" type="file" accept="application/json" hidden>
+            <button class="btn-ghost" id="exportCsvBtn">Exportar CSV</button>
+            <button class="btn-danger" id="clearDataBtn">Borrar todo</button>
+          </div>
+          <div class="helper-note">Después de publicarla, ábrela en Safari y usa “Añadir a pantalla de inicio”.</div>
+        </section>
+
+        <section class="card" id="nuevo-gasto">
+          <div class="section-head"><div><h3>Añadir gasto</h3><p>Entrada rápida y cómoda para iPhone.</p></div></div>
+          <form id="expenseForm" class="form-grid">
+            <div class="field">
+              <label>Importe (€)</label>
+              <input type="number" step="0.01" min="0" id="amount" placeholder="0.00" required>
+            </div>
+            <div class="field">
+              <label>Descripción</label>
+              <input type="text" id="description" placeholder="Supermercado, gasolina, café...">
+            </div>
+            <div class="row-2">
+              <div class="field">
+                <label>Categoría</label>
+                <select id="category" required></select>
+              </div>
+              <div class="field">
+                <label>Fecha</label>
+                <input type="date" id="expenseDate" required>
+              </div>
+            </div>
+            <button class="btn" type="submit">Guardar gasto</button>
+          </form>
+        </section>
+
+        <section class="card" id="filtros">
+          <div class="section-head"><div><h3>Filtrar movimientos</h3><p>Consulta un mes o una categoría concreta.</p></div></div>
+          <div class="form-grid">
+            <div class="row-2">
+              <div class="field">
+                <label>Categoría</label>
+                <select id="filterCategory"></select>
+              </div>
+              <div class="field">
+                <label>Mes</label>
+                <input type="month" id="filterMonth">
+              </div>
+            </div>
+            <button class="btn-ghost" id="clearFiltersBtn" type="button">Limpiar filtros</button>
+          </div>
+        </section>
+
+        <section class="card" id="resumen">
+          <div class="section-head"><div><h3>Resumen por categoría</h3><p>Visual y cómodo para móvil.</p></div></div>
+          <div id="summaryList" class="category-list"></div>
+        </section>
+
+        <section class="card" id="historial">
+          <div class="section-head"><div><h3>Movimientos recientes</h3><p>Listado en tarjetas.</p></div></div>
+          <div id="expenseList" class="expense-list"></div>
+        </section>
+
+        <section class="card" id="categorias">
+          <div class="section-head"><div><h3>Categorías</h3><p>Añade o borra tus categorías personalizadas.</p></div></div>
+          <form id="categoryForm" class="form-grid">
+            <div class="small-actions">
+              <div class="field" style="margin:0">
+                <label>Nueva categoría</label>
+                <input type="text" id="newCategory" placeholder="Ej. Viajes">
+              </div>
+              <button class="btn" type="submit" style="width:auto;padding-inline:18px">Añadir</button>
+            </div>
+          </form>
+          <div id="categoryList" style="margin-top:8px"></div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a class="nav-item active" href="#top"><span>⌂</span>Inicio</a>
+    <a class="nav-item" href="#nuevo-gasto"><span>＋</span>Gasto</a>
+    <a class="nav-item" href="#filtros"><span>◴</span>Filtro</a>
+    <a class="nav-item" href="#resumen"><span>◔</span>Resumen</a>
+    <a class="nav-item" href="#historial"><span>☰</span>Mov.</a>
+  </nav>
+
+  <script>
+    const STORAGE_KEY = "mis_gastos_hosted_v1";
+    const defaultCategories = ["Comida","Transporte","Casa","Ocio","Salud","Suscripciones","Otros"];
+    const $ = id => document.getElementById(id);
+    const state = loadState();
+
+    init();
+
+    function init() {
+      if (!Array.isArray(state.categories) || state.categories.length === 0) state.categories = [...defaultCategories];
+      if (!Array.isArray(state.expenses)) state.expenses = [];
+      $("expenseDate").value = todayISO();
+      $("filterMonth").value = currentMonth();
+      bindEvents();
+      renderAll();
+      registerServiceWorker();
+    }
+
+    function bindEvents() {
+      $("expenseForm").addEventListener("submit", addExpense);
+      $("categoryForm").addEventListener("submit", addCategory);
+      $("filterCategory").addEventListener("change", renderAll);
+      $("filterMonth").addEventListener("change", renderAll);
+      $("clearFiltersBtn").addEventListener("click", clearFilters);
+      $("exportCsvBtn").addEventListener("click", exportCSV);
+      $("exportJsonBtn").addEventListener("click", exportJSON);
+      $("importJsonInput").addEventListener("change", importJSON);
+      $("clearDataBtn").addEventListener("click", clearAllData);
+      $("helpBtn").addEventListener("click", () => alert("Cuando la publiques, abre la URL en Safari y toca Compartir → Añadir a pantalla de inicio."));
+    }
+
+    function loadState() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { categories: [...defaultCategories], expenses: [] };
+      } catch {
+        return { categories: [...defaultCategories], expenses: [] };
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function renderAll() {
+      populateCategorySelects();
+      renderHeader();
+      renderSummary();
+      renderExpenses();
+      renderCategoryManager();
+      saveState();
+    }
+
+    function populateCategorySelects() {
+      const options = state.categories.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("");
+      const currentFilter = $("filterCategory").value;
+      const currentCategory = $("category").value;
+      $("category").innerHTML = options;
+      $("filterCategory").innerHTML = `<option value="">Todas</option>${options}`;
+      if (state.categories.includes(currentCategory)) $("category").value = currentCategory;
+      if (state.categories.includes(currentFilter)) $("filterCategory").value = currentFilter;
+    }
+
+    function getFilteredExpenses() {
+      const selectedCategory = $("filterCategory").value;
+      const selectedMonth = $("filterMonth").value;
+      return [...state.expenses]
+        .filter(e => !selectedCategory || e.category === selectedCategory)
+        .filter(e => !selectedMonth || String(e.date).slice(0,7) === selectedMonth)
+        .sort((a,b) => String(b.date).localeCompare(String(a.date)) || String(b.id).localeCompare(String(a.id)));
+    }
+
+    function renderHeader() {
+      const expenses = getFilteredExpenses();
+      const total = expenses.reduce((sum, e) => sum + Number(e.amount), 0);
+      $("totalText").textContent = money(total);
+      $("countText").textContent = String(expenses.length);
+      $("catCountText").textContent = String(state.categories.length);
+      $("filterText").textContent = $("filterCategory").value || "Todas";
+      $("periodText").textContent = $("filterMonth").value ? humanMonth($("filterMonth").value) : "Todos los meses";
+    }
+
+    function renderSummary() {
+      const expenses = getFilteredExpenses();
+      const summary = {};
+      expenses.forEach(e => summary[e.category] = (summary[e.category] || 0) + Number(e.amount));
+      const entries = Object.entries(summary).sort((a,b) => b[1] - a[1]);
+      const total = entries.reduce((sum, [,v]) => sum + v, 0);
+      const max = entries[0]?.[1] || 0;
+      $("summaryList").innerHTML = entries.length ? entries.map(([category, value]) => {
+        const width = max ? Math.max(8, Math.round(value / max * 100)) : 0;
+        const share = total ? ((value / total) * 100).toFixed(1) : "0.0";
+        return `<div class="category-item"><div class="category-head"><span>${escapeHtml(category)}</span><span>${money(value)} · ${share}%</span></div><div class="bar"><span style="width:${width}%"></span></div></div>`;
+      }).join("") : `<div class="empty">Todavía no hay gastos para mostrar en el resumen.</div>`;
+    }
+
+    function renderExpenses() {
+      const expenses = getFilteredExpenses();
+      $("expenseList").innerHTML = expenses.length ? expenses.map(e => `
+        <article class="expense-item">
+          <div class="expense-top">
+            <div>
+              <div class="expense-title">${escapeHtml(e.description || "Gasto sin descripción")}</div>
+              <div class="expense-meta">${escapeHtml(e.date)}</div>
+            </div>
+            <div class="amount">${money(e.amount)}</div>
+          </div>
+          <div class="expense-bottom">
+            <span class="badge">${escapeHtml(e.category)}</span>
+            <button class="linkish" onclick="deleteExpense('${String(e.id).replace(/'/g, "\\'")}')">Borrar</button>
+          </div>
+        </article>
+      `).join("") : `<div class="empty">No hay movimientos con los filtros seleccionados.</div>`;
+    }
+
+    function renderCategoryManager() {
+      $("categoryList").innerHTML = state.categories.length ? state.categories.map(cat => {
+        const used = state.expenses.some(e => e.category === cat);
+        const canDelete = !used && !defaultCategories.includes(cat);
+        return `<div class="list-row"><div><strong>${escapeHtml(cat)}</strong><div class="expense-meta">${used ? "Tiene gastos asociados" : (defaultCategories.includes(cat) ? "Categoría base" : "Se puede borrar")}</div></div>${canDelete ? `<button class="linkish" onclick="deleteCategory('${String(cat).replace(/'/g, "\\'")}')">Borrar</button>` : `<span class="expense-meta">—</span>`}</div>`;
+      }).join("") : `<div class="empty">No hay categorías.</div>`;
+    }
+
+    function addExpense(event) {
+      event.preventDefault();
+      const amount = Number($("amount").value);
+      const description = $("description").value.trim();
+      const category = $("category").value;
+      const date = $("expenseDate").value;
+      if (!amount || amount <= 0 || !category || !date) return;
+      state.expenses.push({
+        id: window.crypto?.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
+        amount, description, category, date
+      });
+      $("expenseForm").reset();
+      $("expenseDate").value = todayISO();
+      renderAll();
+      location.hash = "#historial";
+    }
+
+    function addCategory(event) {
+      event.preventDefault();
+      const value = $("newCategory").value.trim();
+      if (!value) return;
+      if (state.categories.some(c => c.toLowerCase() === value.toLowerCase())) {
+        alert("Esa categoría ya existe.");
+        return;
+      }
+      state.categories.push(value);
+      state.categories.sort((a,b) => a.localeCompare(b, "es"));
+      $("newCategory").value = "";
+      renderAll();
+    }
+
+    function clearFilters() {
+      $("filterCategory").value = "";
+      $("filterMonth").value = currentMonth();
+      renderAll();
+    }
+
+    function deleteExpense(id) {
+      state.expenses = state.expenses.filter(e => String(e.id) !== String(id));
+      renderAll();
+    }
+    window.deleteExpense = deleteExpense;
+
+    function deleteCategory(category) {
+      if (!confirm(`¿Borrar la categoría "${category}"?`)) return;
+      state.categories = state.categories.filter(c => c !== category);
+      renderAll();
+    }
+    window.deleteCategory = deleteCategory;
+
+    function exportCSV() {
+      const rows = [["id","fecha","descripcion","categoria","importe"]];
+      state.expenses.slice().sort((a,b) => String(b.date).localeCompare(String(a.date))).forEach(e => rows.push([e.id, e.date, e.description || "", e.category, e.amount]));
+      downloadFile(toCSV(rows), "gastos.csv", "text/csv;charset=utf-8;");
+    }
+
+    function exportJSON() {
+      const backup = { app: "Mis Gastos", version: 1, exportedAt: new Date().toISOString(), data: state };
+      downloadFile(JSON.stringify(backup, null, 2), "mis-gastos-copia.json", "application/json");
+    }
+
+    function importJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const parsed = JSON.parse(reader.result);
+          const imported = parsed.data || parsed;
+          if (!Array.isArray(imported.categories) || !Array.isArray(imported.expenses)) throw new Error("Formato no válido");
+          state.categories = imported.categories;
+          state.expenses = imported.expenses;
+          renderAll();
+          alert("Copia importada correctamente.");
+        } catch {
+          alert("No he podido importar ese archivo.");
+        } finally {
+          event.target.value = "";
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function clearAllData() {
+      if (!confirm("Esto borrará todos tus gastos y categorías personalizadas. ¿Continuar?")) return;
+      state.categories = [...defaultCategories];
+      state.expenses = [];
+      $("filterCategory").value = "";
+      $("filterMonth").value = currentMonth();
+      renderAll();
+    }
+
+    function registerServiceWorker() {
+      if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+        navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+      }
+    }
+
+    function currentMonth() {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
+    }
+    function todayISO() {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+    }
+    function humanMonth(value) {
+      if (!value) return "Todos los meses";
+      const [year, month] = value.split("-");
+      const names = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+      return `${names[Number(month)-1]} ${year}`;
+    }
+    function money(value) {
+      return Number(value).toLocaleString("es-ES", { style: "currency", currency: "EUR" });
+    }
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, s => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[s]));
+    }
+    function toCSV(rows) {
+      return rows.map(row => row.map(cell => {
+        const value = String(cell ?? "");
+        return /[",\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
+      }).join(",")).join("\n");
+    }
+    function downloadFile(content, filename, type) {
+      const blob = new Blob([content], { type });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 500);
+    }
+  </script>
+</body>
+</html>

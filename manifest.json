@@ -1,0 +1,11 @@
+{
+  "name": "Mis Gastos",
+  "short_name": "Gastos",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f7f8ff",
+  "theme_color": "#6D5EF9",
+  "lang": "es",
+  "description": "App web para gestionar gastos desde iPhone.",
+  "icons": []
+}
